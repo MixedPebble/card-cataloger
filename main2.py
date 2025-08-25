@@ -80,7 +80,6 @@ def handle_user_input() -> bool:
             deck = process_image_to_deck(filename)
             deck_filename = f"deck_{int(time.time())}.csv"
             save_deck_to_file(deck, deck_filename)
-            save_deck_to_file
         else:
             print("No frame available to save.")
         return True
