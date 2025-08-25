@@ -205,3 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Custom
+*.png
+all_cards.txt
+deck_*.csv
+Keywords.json
