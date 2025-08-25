@@ -8,6 +8,7 @@ from mtgscan.ocr.azure import Azure
 
 background_seperator = None
 last_frame = None
+start_time = time.time()
 
 def run():
     # Initialize video capture (0 = default webcam)
@@ -74,12 +75,13 @@ def handle_user_input() -> bool:
         print("Capturing and saving current frame...")
         # Save the current frame as an image file
         if 'last_frame' in globals() and last_frame is not None:
-            filename = f"capture_{int(time.time())}.png"
+            filename = f"output/capture/{int(time.time())}.png"
             cv2.imwrite(filename, last_frame)
             print(f"Saved frame as {filename}")
             deck = process_image_to_deck(filename)
-            deck_filename = f"deck_{int(time.time())}.csv"
+            deck_filename = f"output/deck{int(start_time)}.csv"
             save_deck_to_file(deck, deck_filename)
+            cv2.waitKey(1)
         else:
             print("No frame available to save.")
         return True
@@ -99,14 +101,16 @@ def handle_motion(frame, thresh):
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
 def process_image_to_deck(image_path: str):
+    print(f"Processing image: {image_path}")
     azure = Azure()
     rec = MagicRecognition(file_all_cards="all_cards.txt", file_keywords="Keywords.json")
     box_texts = azure.image_to_box_texts(image_path)
     deck = rec.box_texts_to_deck(box_texts)
+    print(f"Processing image: {image_path}")
     return deck
 
 def save_deck_to_file(deck, filename):
-    with open(filename, "w") as f:
+    with open(filename, "a") as f:
         for card_name, count in deck:
             f.write(f"{card_name},{count}\n")
 
