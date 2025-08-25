@@ -1,6 +1,10 @@
 import cv2
 import numpy as np
 import time
+from dotenv import load_dotenv
+load_dotenv()
+from mtgscan.text import MagicRecognition
+from mtgscan.ocr.azure import Azure
 
 background_seperator = None
 last_frame = None
@@ -73,9 +77,12 @@ def handle_user_input() -> bool:
             filename = f"capture_{int(time.time())}.png"
             cv2.imwrite(filename, last_frame)
             print(f"Saved frame as {filename}")
+            deck = process_image_to_deck(filename)
+            deck_filename = f"deck_{int(time.time())}.csv"
+            save_deck_to_file(deck, deck_filename)
+            save_deck_to_file
         else:
             print("No frame available to save.")
-        return True
         return True
     # Add more key handling here if needed
     return True  # Continue running
@@ -91,5 +98,17 @@ def handle_motion(frame, thresh):
         (x, y, w, h) = cv2.boundingRect(contour)
         # Draw rectangle around detected motion
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+def process_image_to_deck(image_path: str):
+    azure = Azure()
+    rec = MagicRecognition(file_all_cards="all_cards.txt", file_keywords="Keywords.json")
+    box_texts = azure.image_to_box_texts(image_path)
+    deck = rec.box_texts_to_deck(box_texts)
+    return deck
+
+def save_deck_to_file(deck, filename):
+    with open(filename, "w") as f:
+        for card_name, count in deck:
+            f.write(f"{card_name},{count}\n")
 
 run()
